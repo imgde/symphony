@@ -225,7 +225,7 @@ fun QueueView(context: ViewContext) {
                                             thumbnailLabel = {
                                                 Text((i + 1).toString())
                                             },
-                                            cardModifier = Modifier.dragAndDropSource {
+                                            cardModifier = Modifier.dragAndDropSource(block = {
                                                 detectTapGestures(
                                                     onLongPress = {
                                                         startTransfer(
@@ -242,7 +242,7 @@ fun QueueView(context: ViewContext) {
                                                         )
                                                     }
                                                 )
-                                            },
+                                            }),
                                             onClick = {
                                                 context.symphony.radio.jumpTo(i)
                                                 coroutineScope.launch {
