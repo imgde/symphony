@@ -250,6 +250,7 @@ fun NowPlayingTraditionalControls(context: ViewContext, data: NowPlayingData) {
             style = NowPlayingControlButtonStyle(
                 color = NowPlayingControlButtonColor.Transparent,
             ),
+            Modifier.weight(1f)
         )
         if (data.enableSeekControls) {
             NowPlayingFastRewindButton(
@@ -258,6 +259,7 @@ fun NowPlayingTraditionalControls(context: ViewContext, data: NowPlayingData) {
                 style = NowPlayingControlButtonStyle(
                     color = NowPlayingControlButtonColor.Transparent,
                 ),
+                Modifier.weight(1f)
             )
         }
         NowPlayingPlayPauseButton(
@@ -267,6 +269,7 @@ fun NowPlayingTraditionalControls(context: ViewContext, data: NowPlayingData) {
                 color = NowPlayingControlButtonColor.Surface,
                 size = NowPlayingControlButtonSize.Large,
             ),
+            Modifier.weight(1f)
         )
         if (data.enableSeekControls) {
             NowPlayingFastForwardButton(
@@ -275,6 +278,7 @@ fun NowPlayingTraditionalControls(context: ViewContext, data: NowPlayingData) {
                 style = NowPlayingControlButtonStyle(
                     color = NowPlayingControlButtonColor.Transparent,
                 ),
+                Modifier.weight(1f)
             )
         }
         NowPlayingSkipNextButton(
@@ -283,6 +287,7 @@ fun NowPlayingTraditionalControls(context: ViewContext, data: NowPlayingData) {
             style = NowPlayingControlButtonStyle(
                 color = NowPlayingControlButtonColor.Transparent,
             ),
+            Modifier.weight(1f)
         )
     }
 }
@@ -454,6 +459,7 @@ private fun NowPlayingPlayPauseButton(
     context: ViewContext,
     data: NowPlayingData,
     style: NowPlayingControlButtonStyle,
+    modifier: Modifier = Modifier
 ) {
     data.run {
         NowPlayingControlButton(
@@ -464,7 +470,8 @@ private fun NowPlayingPlayPauseButton(
             },
             onClick = {
                 context.symphony.radio.shorty.playPause()
-            }
+            },
+            modifier = modifier
         )
     }
 }
@@ -474,6 +481,7 @@ private fun NowPlayingSkipPreviousButton(
     context: ViewContext,
     data: NowPlayingData,
     style: NowPlayingControlButtonStyle,
+    modifier: Modifier = Modifier
 ) {
     data.run {
         NowPlayingControlButton(
@@ -481,7 +489,8 @@ private fun NowPlayingSkipPreviousButton(
             icon = Icons.Filled.SkipPrevious,
             onClick = {
                 context.symphony.radio.shorty.previous()
-            }
+            },
+            modifier = modifier
         )
     }
 }
@@ -491,6 +500,7 @@ private fun NowPlayingSkipNextButton(
     context: ViewContext,
     data: NowPlayingData,
     style: NowPlayingControlButtonStyle,
+    modifier: Modifier = Modifier
 ) {
     data.run {
         NowPlayingControlButton(
@@ -498,7 +508,8 @@ private fun NowPlayingSkipNextButton(
             icon = Icons.Filled.SkipNext,
             onClick = {
                 context.symphony.radio.shorty.skip()
-            }
+            },
+            modifier = modifier
         )
     }
 }
@@ -508,6 +519,7 @@ private fun NowPlayingFastRewindButton(
     context: ViewContext,
     data: NowPlayingData,
     style: NowPlayingControlButtonStyle,
+    modifier: Modifier = Modifier
 ) {
     data.run {
         NowPlayingControlButton(
@@ -516,7 +528,8 @@ private fun NowPlayingFastRewindButton(
             onClick = {
                 context.symphony.radio.shorty
                     .seekFromCurrent(-seekBackDuration)
-            }
+            },
+            modifier = modifier
         )
     }
 }
@@ -526,6 +539,7 @@ private fun NowPlayingFastForwardButton(
     context: ViewContext,
     data: NowPlayingData,
     style: NowPlayingControlButtonStyle,
+    modifier: Modifier = Modifier
 ) {
     data.run {
         NowPlayingControlButton(
@@ -534,7 +548,8 @@ private fun NowPlayingFastForwardButton(
             onClick = {
                 context.symphony.radio.shorty
                     .seekFromCurrent(seekForwardDuration)
-            }
+            },
+            modifier = modifier
         )
     }
 }
@@ -559,6 +574,7 @@ private data class NowPlayingControlButtonStyle(
 private fun NowPlayingControlButton(
     style: NowPlayingControlButtonStyle,
     icon: ImageVector,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
     val backgroundColor = when (style.color) {
@@ -576,7 +592,7 @@ private fun NowPlayingControlButton(
     }
 
     IconButton(
-        modifier = Modifier.background(backgroundColor, CircleShape),
+        modifier = Modifier.background(backgroundColor, CircleShape).then(modifier),
         onClick = onClick,
     ) {
         Icon(
