@@ -43,7 +43,7 @@ fun NowPlayingBody(context: ViewContext, data: NowPlayingData) {
                 modifier = Modifier.fillMaxSize(),
                 topBar = {
                     if (orientation.isPortrait) {
-                        NowPlayingAppBar(context)
+                        NowPlayingAppBar(context, data)
                     }
                 },
                 content = { contentPadding ->
