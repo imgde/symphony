@@ -18,7 +18,7 @@ fun NothingPlaying(context: ViewContext) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            NowPlayingAppBar(context)
+            NowPlayingAppBar(context, null)
         },
         content = { contentPadding ->
             Box(

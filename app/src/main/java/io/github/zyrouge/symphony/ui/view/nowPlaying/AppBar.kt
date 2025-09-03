@@ -19,14 +19,15 @@ import androidx.compose.ui.unit.dp
 import io.github.zyrouge.symphony.ui.components.IconButtonPlaceholder
 import io.github.zyrouge.symphony.ui.components.TopAppBarMinimalTitle
 import io.github.zyrouge.symphony.ui.helpers.ViewContext
+import io.github.zyrouge.symphony.ui.view.NowPlayingData
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NowPlayingAppBar(context: ViewContext) {
+fun NowPlayingAppBar(context: ViewContext, data: NowPlayingData?) {
     CenterAlignedTopAppBar(
         title = {
             TopAppBarMinimalTitle {
-                Text(context.symphony.t.NowPlaying)
+                Text(if (data == null || data.song.album == null) context.symphony.t.NowPlaying else data.song.album.toString())
             }
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
