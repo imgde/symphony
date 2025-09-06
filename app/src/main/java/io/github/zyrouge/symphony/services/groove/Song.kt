@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
+import android.os.Build.VERSION.SDK_INT
 import androidx.compose.runtime.Immutable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -143,11 +144,15 @@ data class Song(
                     return@let name
                 }
                 val bitmap = BitmapFactory.decodeByteArray(it.data, 0, it.data.size)
-                val name = "$id.jpg"
+                val name = "$id.webp"
                 FileOutputStream(symphony.database.artworkCache.get(name)).use { writer ->
                     ImagePreserver
                         .resize(bitmap, quality)
-                        .compress(Bitmap.CompressFormat.JPEG, 100, writer)
+                        .compress(
+                            if (SDK_INT < 30) Bitmap.CompressFormat.WEBP else Bitmap.CompressFormat.WEBP_LOSSY,
+                            100,
+                            writer
+                        )
                 }
                 name
             }
@@ -193,11 +198,15 @@ data class Song(
             val coverFile = retriever.embeddedPicture?.let {
                 val bitmap = BitmapFactory.decodeByteArray(it, 0, it.size)
                 val quality = symphony.settings.artworkQuality.value
-                val name = "$id.jpg"
+                val name = "$id.webp"
                 FileOutputStream(symphony.database.artworkCache.get(name)).use { writer ->
                     ImagePreserver
                         .resize(bitmap, quality)
-                        .compress(Bitmap.CompressFormat.JPEG, 100, writer)
+                        .compress(
+                            if (SDK_INT < 30) Bitmap.CompressFormat.WEBP else Bitmap.CompressFormat.WEBP_LOSSY,
+                            100,
+                            writer
+                        )
                 }
                 name
             }
