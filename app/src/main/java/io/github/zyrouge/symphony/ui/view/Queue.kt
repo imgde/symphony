@@ -1,24 +1,15 @@
 package io.github.zyrouge.symphony.ui.view
 
-import android.content.ClipData
-import android.content.ClipDescription
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.draganddrop.dragAndDropSource
-import androidx.compose.foundation.draganddrop.dragAndDropTarget
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ClearAll
-import androidx.compose.material.icons.filled.DragIndicator
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -37,11 +28,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draganddrop.DragAndDropEvent
-import androidx.compose.ui.draganddrop.DragAndDropTarget
-import androidx.compose.ui.draganddrop.DragAndDropTransferData
-import androidx.compose.ui.draganddrop.mimeTypes
-import androidx.compose.ui.draganddrop.toAndroidDragEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.github.zyrouge.symphony.services.groove.Groove
@@ -51,17 +37,13 @@ import io.github.zyrouge.symphony.ui.components.SongCard
 import io.github.zyrouge.symphony.ui.components.TopAppBarMinimalTitle
 import io.github.zyrouge.symphony.ui.helpers.ViewContext
 import io.github.zyrouge.symphony.ui.view.nowPlaying.NothingPlayingBody
-import io.github.zyrouge.symphony.utils.Logger
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 @Serializable
 object QueueViewRoute
 
-
-const val QueueDragAndDropLabel = "symphony_song_drag_drop"
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QueueView(context: ViewContext) {
     val coroutineScope = rememberCoroutineScope()
@@ -132,136 +114,36 @@ fun QueueView(context: ViewContext) {
                             contentType = { _, _ -> Groove.Kind.SONG },
                         ) { i, songId ->
                             context.symphony.groove.song.get(songId)?.let { song ->
-                                var dragBackground by remember { mutableStateOf(Color.Transparent) }
-                                Box(
-                                    Modifier
-                                        .background(dragBackground)
-                                        .dragAndDropTarget(
-                                            shouldStartDragAndDrop = {
-                                                //filter out most foreign drag&drops, can be simplified
-                                                    event ->
-                                                event.run {
-                                                    if (!event.mimeTypes()
-                                                            .contains(ClipDescription.MIMETYPE_TEXT_PLAIN)
-                                                    ) {
-                                                        Logger.warn("DropTarget", "Wrong Mimetype")
-                                                        return@run false
-                                                    }
-                                                    if (event.toAndroidDragEvent().clipDescription.label != QueueDragAndDropLabel) {
-                                                        Logger.warn(
-                                                            "DropTarget",
-                                                            "Not $QueueDragAndDropLabel Label"
-                                                        )
-                                                        return@run false
-                                                    }
-                                                    if (event.toAndroidDragEvent().localState == null) {
-                                                        Logger.warn("DropTarget", "localState null")
-                                                        return@run false
-                                                    }
-                                                    if (event.toAndroidDragEvent().localState !is List<*>) {
-                                                        Logger.warn(
-                                                            "DropTarget",
-                                                            "Wrong ClipData localState Type ${event.toAndroidDragEvent().localState}"
-                                                        )
-                                                        return@run false
-                                                    }
-                                                    if ((event.toAndroidDragEvent().localState as List<*>).size != 2) {
-                                                        Logger.warn(
-                                                            "DropTarget",
-                                                            "Wrong List size ${(event.toAndroidDragEvent().localState as List<*>).size}"
-                                                        )
-                                                        return@run false
-                                                    }
-                                                    return@run true
-                                                }
-                                            },
-                                            target = remember {
-                                                object : DragAndDropTarget {
-                                                    override fun onEntered(event: DragAndDropEvent) {
-                                                        dragBackground =
-                                                            Color.DarkGray.copy(alpha = 0.35f)
-                                                    }
-
-                                                    override fun onExited(event: DragAndDropEvent) {
-                                                        dragBackground = Color.Transparent
-                                                    }
-
-                                                    override fun onDrop(event: DragAndDropEvent): Boolean {
-                                                        val list =
-                                                            event.toAndroidDragEvent().localState as List<*>
-                                                        val droppedI: Int =
-                                                            list[0].toString().toInt()
-                                                        val droppedSongId: String =
-                                                            list[1].toString()
-                                                        if (droppedI == i) {
-                                                            return true
-                                                        }
-                                                        //always put after the dropped song
-                                                        val newIndex =
-                                                            if (droppedI < i) i else i + 1
-                                                        //TODO: make something else when queueIndex == droppedI
-                                                        // otherwise we swap the current playing song which isn't intended
-                                                        context.symphony.radio.queue.remove(droppedI)
-                                                        context.symphony.radio.queue.add(
-                                                            droppedSongId,
-                                                            index = newIndex
-                                                        )
-                                                        return true
-                                                    }
-                                                }
+                                Box {
+                                    SongCard(
+                                        context,
+                                        song,
+                                        autoHighlight = false,
+                                        highlighted = i == queueIndex,
+                                        thumbnailLabel = {
+                                            Text((i + 1).toString())
+                                        },
+                                        modifier = if (i < queueIndex) Modifier.background(
+                                            MaterialTheme.colorScheme.background.copy(
+                                                alpha = 0.3f
+                                            )
+                                        ) else Modifier,
+                                        onClick = {
+                                            context.symphony.radio.jumpTo(i)
+                                            coroutineScope.launch {
+                                                listState.animateScrollToItem(i)
                                             }
-                                        )
-                                ) {
-                                    Box {
-                                        SongCard(
-                                            context,
-                                            song,
-                                            autoHighlight = false,
-                                            highlighted = i == queueIndex,
-                                            leading = {
-                                                Icon(Icons.Filled.DragIndicator, null)
-                                                Spacer(modifier = Modifier.width(8.dp))
-                                            },
-                                            thumbnailLabel = {
-                                                Text((i + 1).toString())
-                                            },
-                                            cardModifier = Modifier.dragAndDropSource(block = {
-                                                detectTapGestures(
-                                                    onLongPress = {
-                                                        startTransfer(
-                                                            DragAndDropTransferData(
-                                                                ClipData.newPlainText(
-                                                                    QueueDragAndDropLabel,
-                                                                    ""
-                                                                ),
-                                                                localState = listOf(
-                                                                    i.toString(),
-                                                                    songId
-                                                                )
-                                                            )
-                                                        )
-                                                    }
-                                                )
-                                            }),
-                                            onClick = {
-                                                context.symphony.radio.jumpTo(i)
-                                                coroutineScope.launch {
-                                                    listState.animateScrollToItem(i)
-                                                }
-                                            },
-                                        )
-                                        if (i < queueIndex) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .matchParentSize()
-                                                    .background(
-                                                        MaterialTheme.colorScheme.background.copy(
-                                                            alpha = 0.3f
-                                                        )
-                                                    )
+                                        },
+                                        dragAndDropEnabled = true,
+                                        dragAndDropPos = i,
+                                        dragAndDropAction = { droppedI: Int, droppedSongId: String ->
+                                            context.symphony.radio.queue.handleDragAndDrop(
+                                                droppedI,
+                                                droppedSongId,
+                                                i
                                             )
                                         }
-                                    }
+                                    )
                                 }
                             }
                         }
