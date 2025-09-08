@@ -23,6 +23,7 @@ import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.material.icons.automirrored.outlined.QueueMusic
 import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.Album
+import androidx.compose.material.icons.filled.AllInclusive
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.FolderOpen
@@ -36,6 +37,7 @@ import androidx.compose.material.icons.filled.SupervisorAccount
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.outlined.AccountTree
 import androidx.compose.material.icons.outlined.Album
+import androidx.compose.material.icons.outlined.AllInclusive
 import androidx.compose.material.icons.outlined.Face
 import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.FolderOpen
@@ -85,6 +87,7 @@ import io.github.zyrouge.symphony.ui.view.home.AlbumArtistsView
 import io.github.zyrouge.symphony.ui.view.home.AlbumsView
 import io.github.zyrouge.symphony.ui.view.home.ArtistsView
 import io.github.zyrouge.symphony.ui.view.home.BrowserView
+import io.github.zyrouge.symphony.ui.view.home.DupeView
 import io.github.zyrouge.symphony.ui.view.home.FoldersView
 import io.github.zyrouge.symphony.ui.view.home.ForYouView
 import io.github.zyrouge.symphony.ui.view.home.GenresView
@@ -154,6 +157,11 @@ enum class HomePage(
         label = { it.symphony.t.Tree },
         selectedIcon = { Icons.Filled.AccountTree },
         unselectedIcon = { Icons.Outlined.AccountTree }
+    ),
+    Dupes(
+        label = { "Dupes" },
+        selectedIcon = { Icons.Filled.AllInclusive },
+        unselectedIcon = { Icons.Outlined.AllInclusive }
     );
 }
 
@@ -280,6 +288,7 @@ fun HomeView(context: ViewContext) {
                     HomePage.Folders -> FoldersView(context)
                     HomePage.Playlists -> PlaylistsView(context)
                     HomePage.Tree -> TreeView(context)
+                    HomePage.Dupes -> DupeView(context)
                 }
             }
         },
