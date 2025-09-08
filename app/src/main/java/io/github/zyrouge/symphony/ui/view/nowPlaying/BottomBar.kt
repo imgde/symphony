@@ -95,15 +95,15 @@ fun NowPlayingBodyBottomBar(
                 Icon(
                     Icons.AutoMirrored.Filled.Sort,
                     null,
-                    modifier = Modifier.size(20.dp),
+                    modifier = Modifier
+                        .size(24.dp)
+                        .weight(1f),
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    context.symphony.t.PlayingXofY(
-                        (currentSongIndex + 1).toString(),
-                        queueSize.toString(),
-                    ),
+                    text = "${currentSongIndex + 1} / $queueSize",
                     overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(5f)
                 )
             }
             Spacer(modifier = Modifier.width(2.dp))
