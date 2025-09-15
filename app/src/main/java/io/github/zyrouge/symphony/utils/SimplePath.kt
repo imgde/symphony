@@ -12,13 +12,39 @@ class SimplePath(val parts: List<String>) {
     val name get() = parts.last()
     val nameWithoutExtension get() = name.substringBeforeLast(".")
     val extension get() = name.substringAfterLast(".", "")
-    val parent get() = if (parts.size > 1) SimplePath(parts.subList(0, parts.lastIndex)) else null
+    private var _parent: SimplePath? = null
+    val parent get() = _parent
     val size get() = parts.size
     val pathString get() = parts.joinToString("/")
+
+    init {
+        if(size > 1) {
+            _parent = SimplePath(parts.subList(0, parts.lastIndex))
+        }
+    }
 
     fun join(vararg nParts: String) = SimplePath(this, *nParts)
 
     override fun toString() = pathString
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as SimplePath
+        return pathString == other.pathString
+    }
+
+    override fun hashCode(): Int {
+        var result = parts.hashCode()
+        result = 31 * result + (_parent?.hashCode() ?: 0)
+        result = 31 * result + size
+        result = 31 * result + name.hashCode()
+        result = 31 * result + nameWithoutExtension.hashCode()
+        result = 31 * result + extension.hashCode()
+        result = 31 * result + (parent?.hashCode() ?: 0)
+        result = 31 * result + pathString.hashCode()
+        return result
+    }
 
     companion object {
         private fun p(vararg path: String) = path.fold(listOf<String>()) { prev, curr ->

@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Colorize
 import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.FolderOff
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.PhotoSizeSelectLarge
@@ -63,6 +64,7 @@ fun AppearanceSettingsView(context: ViewContext) {
     val primaryColor by context.symphony.settings.primaryColor.flow.collectAsState()
     val fontScale by context.symphony.settings.fontScale.flow.collectAsState()
     val contentScale by context.symphony.settings.contentScale.flow.collectAsState()
+    val hideTreeFoldersRecursive by context.symphony.settings.hideTreeFoldersRecursive.flow.collectAsState()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -227,6 +229,19 @@ fun AppearanceSettingsView(context: ViewContext) {
                         enabled = !useMaterialYou,
                         onChange = { value ->
                             context.symphony.settings.primaryColor.setValue(value.name)
+                        }
+                    )
+                    HorizontalDivider()
+                    SettingsSwitchTile(
+                        icon = {
+                            Icon(Icons.Filled.FolderOff, null)
+                        },
+                        title = {
+                            Text("Hide Subfolders by Default") //TODO: i18n
+                        },
+                        value = hideTreeFoldersRecursive,
+                        onChange = { value ->
+                            context.symphony.settings.hideTreeFoldersRecursive.setValue(value)
                         }
                     )
                 }
