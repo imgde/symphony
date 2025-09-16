@@ -13,4 +13,12 @@ object StringListUtils {
         }
         return if (reverse) sorted.reversed() else sorted
     }
+
+    fun <T, R: Comparable<R>> sort(values: List<T>, keyExtractor: (T) -> R, by: SortBy, reverse: Boolean): List<T> {
+        val sorted: List<T> = when (by) {
+            SortBy.CUSTOM -> values
+            SortBy.NAME -> values.sortedBy(keyExtractor)
+        }
+        return if (reverse) sorted.reversed() else sorted
+    }
 }

@@ -244,6 +244,7 @@ class Settings(private val symphony: Symphony) {
         ResponsiveGridColumns.DEFAULT_VERTICAL_COLUMNS,
     )
     val lastDisabledTreePaths = StringSetEntry("last_disabled_tree_paths", emptySet())
+    val hideTreeFoldersRecursive = BooleanEntry("hide_tree_folders_recursive", false)
     val previousSongQueue = object : Entry<RadioQueue.Serialized?>("previous_song_queue") {
         override fun getValueInternal() = getSharedPreferences().getString(key, null)?.let {
             RadioQueue.Serialized.parse(it)

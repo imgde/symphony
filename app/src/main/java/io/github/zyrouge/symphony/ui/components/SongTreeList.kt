@@ -44,7 +44,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -66,15 +66,16 @@ fun SongTreeList(
     context: ViewContext,
     songIds: List<String>,
     songsCount: Int? = null,
-    initialDisabled: List<String>,
-    onDisable: ((List<String>) -> Unit),
+    initialDisabled: Set<String>,
+    recursiveFolding: Boolean,
+    onDisable: ((Set<String>) -> Unit),
 ) {
     val tree by remember(songIds) {
         derivedStateOf { createLinearTree(context, songIds) }
     }
     val disabled = remember {
-        mutableStateListOf<String>().apply {
-            addAll(initialDisabled)
+        mutableStateMapOf<String, Boolean>().apply {
+            putAll(initialDisabled.map { it to true })
         }
     }
     val pathsSortBy by context.symphony.settings.lastUsedTreePathSortBy.flow.collectAsState()
@@ -83,7 +84,7 @@ fun SongTreeList(
     val songsSortReverse by context.symphony.settings.lastUsedSongsSortReverse.flow.collectAsState()
     val sortedTree by remember(tree, pathsSortBy, pathsSortReverse, songsSortBy, songsSortReverse) {
         derivedStateOf {
-            val pairs = StringListUtils.sort(tree.keys.toList(), pathsSortBy, pathsSortReverse)
+            val pairs = StringListUtils.sort(tree.keys.toList(), SimplePath::pathString, pathsSortBy, pathsSortReverse)
                 .map {
                     it to context.symphony.groove.song.sort(
                         tree[it]!!,
@@ -139,12 +140,13 @@ fun SongTreeList(
                     tree = sortedTree,
                     songIds = sortedSongIds,
                     disabled = disabled,
+                    recursiveFolding = recursiveFolding,
                     togglePath = { dirname ->
                         when {
                             disabled.contains(dirname) -> disabled.remove(dirname)
-                            else -> disabled.add(dirname)
+                            else -> disabled.put(dirname, true)
                         }
-                        onDisable(disabled.toList())
+                        onDisable(disabled.keys)
                     }
                 )
             }
@@ -156,9 +158,10 @@ fun SongTreeList(
 @Composable
 fun SongTreeListContent(
     context: ViewContext,
-    tree: Map<String, List<String>>,
+    tree: Map<SimplePath, List<String>>,
     songIds: List<String>,
-    disabled: List<String>,
+    disabled: Map<String, Boolean>,
+    recursiveFolding: Boolean,
     togglePath: (String) -> Unit,
 ) {
     val lazyListState = rememberLazyListState()
@@ -173,8 +176,17 @@ fun SongTreeListContent(
         state = lazyListState,
         modifier = Modifier.drawScrollBar(lazyListState),
     ) {
-        tree.forEach { (dirname, childSongIds) ->
-            val show = !disabled.contains(dirname)
+        tree.forEach { (dir, childSongIds) ->
+            if(recursiveFolding) {
+                var parent = dir.parent
+                while(parent != null) {
+                    if(disabled.contains(parent.pathString)) {
+                        return@forEach
+                    }
+                    parent = parent.parent
+                }
+            }
+            val show = !disabled.contains(dir.pathString)
             val sepPadding = if (show) 4.dp else 0.dp
 
             stickyHeader {
@@ -184,7 +196,7 @@ fun SongTreeListContent(
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp))
-                            .clickable { togglePath(dirname) }
+                            .clickable { togglePath(dir.pathString) }
                             .padding(
                                 start = 12.dp,
                                 end = 8.dp,
@@ -201,7 +213,7 @@ fun SongTreeListContent(
                             modifier = Modifier.size(20.dp),
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(dirname, style = MaterialTheme.typography.labelMedium)
+                        Text(dir.pathString, style = MaterialTheme.typography.labelMedium)
                         Spacer(modifier = Modifier.weight(1f))
 
                         var showOptionsMenu by remember { mutableStateOf(false) }
@@ -522,16 +534,16 @@ fun StringListUtils.SortBy.label(context: ViewContext) = when (this) {
 private fun createLinearTree(
     context: ViewContext,
     songIds: List<String>,
-): Map<String, List<String>> {
-    val result = mutableMapOf<String, MutableList<String>>()
+): Map<SimplePath, List<String>> {
+    val result = mutableMapOf<SimplePath, MutableList<String>>()
     songIds.forEach { songId ->
         val song = context.symphony.groove.song.get(songId) ?: return@forEach
         val parsedPath = SimplePath(song.path)
-        val dirname = parsedPath.parent!!.pathString
-        if (!result.containsKey(dirname)) {
-            result[dirname] = mutableListOf()
+        val dir = parsedPath.parent!!
+        if (!result.containsKey(dir)) {
+            result[dir] = mutableListOf()
         }
-        result[dirname]!!.add(songId)
+        result[dir]!!.add(songId)
     }
     return result
 }
