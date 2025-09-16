@@ -16,14 +16,19 @@ class DupeManager(val symphony: Symphony) {
     var count by mutableIntStateOf(0) //TODO: dupe count is (probably) counted wrong
     val similarityMap = mutableStateMapOf<String, SnapshotStateList<String>>()
     val coroutineScope = CoroutineScope(Dispatchers.Default)
-    var done = false
+    var isDone = false
+    var isRefreshing = false
 
     private fun insert(id: String, id2: String) {
 
         val min = minOf(id, id2)
         val max = if (id == min) id2 else id
         var list: SnapshotStateList<String>
-
+        for(simList in similarityMap.values) {
+            if(simList.contains(id) || simList.contains(id2)) {
+                list = simList
+            }
+        }
         if (similarityMap[id] != null) {
             list = similarityMap[id]!!
         } else if (similarityMap[id2] != null) {
@@ -41,12 +46,20 @@ class DupeManager(val symphony: Symphony) {
 
     fun fetchDupes(songIds: List<String>, force: Boolean = false) {
         if(force) {
-            done = false
+            isRefreshing = false
+            isDone = false
+            count = 0
+            similarityMap.clear()
         }
-        if(done || songIds.isEmpty()){
+        if(isRefreshing) {
+            return
+        }
+        if(isDone || songIds.isEmpty()){
+            isRefreshing = false
             return
         }
         coroutineScope.launch {
+            isRefreshing = true
             songIds.forEachIndexed { i, songId ->
                 val song = symphony.groove.song.get(songId)
                 if (song == null) {
@@ -65,7 +78,8 @@ class DupeManager(val symphony: Symphony) {
                     }
                 }
             }
-            done = true
+            isRefreshing = false
+            isDone = true
         }
     }
 }
