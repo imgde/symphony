@@ -42,6 +42,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,6 +59,7 @@ import io.github.zyrouge.symphony.ui.view.ArtistViewRoute
 import io.github.zyrouge.symphony.ui.view.NowPlayingControlsLayout
 import io.github.zyrouge.symphony.ui.view.NowPlayingData
 import io.github.zyrouge.symphony.utils.DurationUtils
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -577,6 +579,7 @@ private fun NowPlayingControlButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
+    val coroutineScope = rememberCoroutineScope()
     val backgroundColor = when (style.color) {
         NowPlayingControlButtonColor.Primary -> MaterialTheme.colorScheme.primary
         NowPlayingControlButtonColor.Surface -> MaterialTheme.colorScheme.surfaceVariant
@@ -593,7 +596,7 @@ private fun NowPlayingControlButton(
 
     IconButton(
         modifier = Modifier.background(backgroundColor, CircleShape).then(modifier),
-        onClick = onClick,
+        onClick = { coroutineScope.launch { onClick() } },
     ) {
         Icon(
             icon,
