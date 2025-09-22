@@ -612,7 +612,7 @@ enum class SongContextMenuActions(
                             }
                         it.context.activity.startActivity(intent)
                     } catch (err: Exception) {
-                        io.github.zyrouge.symphony.utils.Logger.error(
+                        Logger.error(
                             "SongCard",
                             "share failed",
                             err
