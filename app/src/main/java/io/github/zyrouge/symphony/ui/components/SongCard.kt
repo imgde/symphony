@@ -360,7 +360,7 @@ fun SongDropdownMenu(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
 ) {
-    val data by remember {
+    val data by remember(song, isFavorite, expanded) {
         mutableStateOf(
             SongDropdownMenuData(
                 context,
