@@ -1,3 +1,20 @@
+# Changes from main branch
+- Radio:
+ + shuffle mode is being saved (no more reshuffling after starting another queue)
+- UI:
+ + swipe gesture (changeable between show album, add to queue last place, add to queue as next song)
+ + "Now playing" shows album title instead if there is one
+ + fixed spacings in the "Now playing" bottom bar (no more ... clipping out of screen)
+ + drag and drop in song queue (might feel weird, but its better than what we had before)
+- UX:
+ + normal search (toggleable)
+ + traditional layout: big buttons
+ + customizable ... menu (currently only for songs because album ones doesnt feel cluttered)
+- Other:
+ + primitive dupe detector (doesn't update UI when song has been deleted)
+ + primitive song deletion (might need to re-add your folders for this to work, currently only for songs, doesnt update UI accordingly)
+ + currently half-broken recursive treeview folding
+
 <p align="center">
     <img src="./media/banner.png" width="100%">
 </p>
